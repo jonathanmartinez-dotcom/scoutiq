@@ -1,0 +1,822 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #1B4332;
+}
+
+#map { width: 100%; height: 100%; }
+
+#logo {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 1000;
+  background: rgba(27, 67, 50, 0.94);
+  color: white;
+  padding: 14px 18px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+#logo h1 { font-size: 22px; }
+#logo p { margin-top: 4px; color: #B7E4C7; font-size: 13px; }
+
+#modeTabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.modeTab {
+  background: rgba(255,255,255,0.12);
+  color: #B7E4C7;
+  border: 1px solid rgba(183,228,199,0.4);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modeTab.active {
+  background: #74C69D;
+  color: #1B4332;
+  border-color: #74C69D;
+}
+
+#huntCodeBadge {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  background: #D9A441;
+  color: #1B4332;
+  padding: 8px 14px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+#clearHuntCodeBtn {
+  background: #1B4332;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#filterBar {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1000;
+  background: rgba(248, 247, 243, 0.96);
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  min-width: 260px;
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #74C69D transparent;
+}
+
+#filterBar::-webkit-scrollbar {
+  width: 6px;
+}
+
+#filterBar::-webkit-scrollbar-thumb {
+  background: #74C69D;
+  border-radius: 3px;
+}
+
+.filterGroup {
+  margin-top: 12px;
+  border-top: 1px solid rgba(27, 67, 50, 0.15);
+  padding-top: 8px;
+}
+
+.filterGroup:first-of-type {
+  margin-top: 14px;
+}
+
+.filterGroup summary {
+  font-size: 13px;
+  font-weight: bold;
+  color: #1B4332;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.filterGroup summary::-webkit-details-marker {
+  display: none;
+}
+
+.filterGroup summary::after {
+  content: "+";
+  font-size: 15px;
+  color: #2D6A4F;
+  font-weight: bold;
+}
+
+.filterGroup[open] summary::after {
+  content: "\2212";
+}
+
+.filterGroup .layerToggle {
+  margin-top: 8px;
+}
+
+#filterBar label {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  color: #1B4332;
+  margin-bottom: 6px;
+}
+
+#unitSelect {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid #B7E4C7;
+  background: white;
+  color: #1B4332;
+  font-size: 14px;
+}
+
+.layerToggle {
+  margin-top: 10px;
+  color: #1B4332;
+  font-size: 14px;
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal !important;
+}
+
+.layerToggle input:disabled + span {
+  opacity: .45;
+}
+
+#status {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #555;
+}
+
+#resetBtn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: #2D6A4F;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.unit-label {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: #1B4332;
+  font-weight: bold;
+  font-size: 12px;
+  text-shadow: 0 0 3px white, 0 0 5px white;
+}
+
+.legend {
+  position: absolute;
+  bottom: 22px;
+  left: 18px;
+  z-index: 1000;
+  background: rgba(248,247,243,.94);
+  color: #1B4332;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.legend div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.swatch {
+  width: 18px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,.25);
+}
+
+.infoBtn {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 50%;
+  border: none;
+  background: #74C69D;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  font-style: italic;
+  font-family: Georgia, serif;
+  line-height: 16px;
+  text-align: center;
+  padding: 0;
+  cursor: pointer;
+}
+
+.infoBtn:hover,
+.infoBtn:focus {
+  background: #2D6A4F;
+}
+
+#infoPopover {
+  display: none;
+  position: fixed;
+  z-index: 3000;
+  max-width: 220px;
+  background: #F8F7F3;
+  color: #1B4332;
+  padding: 12px 14px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+#infoPopover strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.infoGradientBar {
+  height: 10px;
+  border-radius: 4px;
+  margin: 8px 0 4px;
+}
+
+.infoGradientLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #555;
+}
+
+.infoSwatch {
+  width: 26px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,.25);
+  margin-top: 6px;
+}
+
+.pinColorRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.pinColorSwatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  display: inline-block;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.pinColorSwatch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+
+.pinColorSwatch.selected {
+  border-color: #1B4332;
+  box-shadow: 0 0 0 2px white inset;
+}
+
+.pinBtnRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+#dropPinBtn, #clearPinsBtn {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#dropPinBtn {
+  background: #2D6A4F;
+  color: white;
+}
+
+#dropPinBtn.active {
+  background: #1B4332;
+  box-shadow: 0 0 0 2px #74C69D;
+}
+
+#clearPinsBtn {
+  background: #F8F7F3;
+  color: #8A5A12;
+  border: 1px solid rgba(138, 90, 18, 0.3);
+}
+
+#locateBtn {
+  position: absolute;
+  bottom: 22px;
+  right: 18px;
+  z-index: 1000;
+  background: rgba(248, 247, 243, 0.96);
+  color: #1B4332;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 24px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#locateBtn.active {
+  background: #2D6A4F;
+  color: white;
+}
+
+.userLocationDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2C7DA0;
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px #2C7DA0;
+  position: relative;
+}
+
+.userLocationDot::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(44, 125, 160, 0.35);
+  animation: locationPulse 2s infinite;
+}
+
+@keyframes locationPulse {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+
+/* ============================================================
+   Plan Your Hunt mode
+   ============================================================ */
+
+#planPanel {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1000;
+  background: rgba(248, 247, 243, 0.96);
+  padding: 14px;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  min-width: 260px;
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #74C69D transparent;
+}
+
+#planPanel label {
+  display: block;
+  font-size: 13px;
+  font-weight: bold;
+  color: #1B4332;
+  margin-bottom: 6px;
+}
+
+#planPanel select {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  border: 1px solid #B7E4C7;
+  background: white;
+  color: #1B4332;
+  font-size: 14px;
+}
+
+#planPanel input[type="range"] {
+  width: 100%;
+  accent-color: #2D6A4F;
+}
+
+.sliderScale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #666;
+  margin-top: 2px;
+}
+
+#sampleBanner {
+  background: #D9A441;
+  color: #1B4332;
+  font-weight: bold;
+  font-size: 11px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+#oddsLegend {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(27,67,50,0.15);
+  font-size: 12px;
+}
+
+#oddsLegend strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #1B4332;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: #444;
+}
+
+.legendSwatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+#planResultsPanel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(248, 247, 243, 0.97);
+  padding: 0;
+  border-radius: 0;
+  box-shadow: 0 -6px 20px rgba(0,0,0,0.25);
+  width: auto;
+  height: 200px;
+  max-height: 32vh;
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #74C69D transparent;
+}
+
+#planResultsHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1B4332;
+  color: white;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.02em;
+  border-radius: 0;
+  cursor: default;
+}
+
+#togglePlanResultsBtn {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#planResultsBody {
+  padding: 14px;
+}
+
+#unitSearchRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+#unitSearchInput {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #B7E4C7;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1B4332;
+}
+
+#unitSearchInput:focus {
+  outline: none;
+  border-color: #2D6A4F;
+}
+
+#unitSearchBtn {
+  background: #2D6A4F;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+#unitSearchBtn:hover {
+  background: #1B4332;
+}
+
+#unitSearchError {
+  background: #F8F7F3;
+  border: 1px solid #BC4B51;
+  color: #BC4B51;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+#planPrompt {
+  background: #F8F7F3;
+  border: 1px dashed #74C69D;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #1B4332;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+#summaryTiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tile {
+  background: white;
+  border: 1px solid #B7E4C7;
+  border-radius: 10px;
+  padding: 8px 4px;
+  text-align: center;
+}
+
+.tileValue {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2D6A4F;
+}
+
+.tileLabel {
+  font-size: 10px;
+  color: #666;
+  margin-top: 2px;
+}
+
+#tableWrap {
+  background: white;
+  border-radius: 10px;
+  overflow-x: auto;
+  overflow-y: visible;
+  border: 1px solid #B7E4C7;
+}
+
+#drawTable {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+#drawTable thead {
+  background: #1B4332;
+  color: white;
+}
+
+#drawTable th {
+  text-align: left;
+  padding: 8px 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+#drawTable td {
+  padding: 8px 8px;
+  border-bottom: 1px solid rgba(27,67,50,0.08);
+  white-space: nowrap;
+}
+
+#drawTable tbody tr:hover {
+  background: rgba(116, 198, 157, 0.15);
+  cursor: pointer;
+}
+
+.oddsCell {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  font-size: 11px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.trendUp { color: #BC4B51; font-weight: bold; }
+.trendDown { color: #40916C; font-weight: bold; }
+.trendFlat { color: #888; }
+
+#leftInfoPanel {
+  position: absolute;
+  top: 160px;
+  left: 18px;
+  z-index: 1200;
+  width: 300px;
+  max-height: calc(100vh - 380px);
+  overflow-y: auto;
+  background: rgba(248, 247, 243, 0.97);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  scrollbar-width: thin;
+  scrollbar-color: #74C69D transparent;
+}
+
+#leftInfoPanelHeader {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1B4332;
+  color: white;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: bold;
+  border-radius: 12px 12px 0 0;
+}
+
+#leftInfoPanelHeader .closeBtn {
+  cursor: pointer;
+  color: #B7E4C7;
+  font-weight: bold;
+}
+
+#leftInfoPanelBody {
+  padding: 14px 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #1B4332;
+}
+
+#leftInfoPanelBody strong {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.unitGroupList {
+  margin-top: 10px;
+  border-top: 1px solid #B7E4C7;
+  padding-top: 8px;
+}
+
+.unitGroupRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.unitGroupRow:hover {
+  background: rgba(116, 198, 157, 0.2);
+}
+
+.unitGroupRow .focusHint {
+  color: #2D6A4F;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+/* --- mobile tuning --- */
+@media (max-width: 640px) {
+  #filterBar {
+    min-width: 0;
+    width: calc(100% - 90px);
+    right: 12px;
+    top: 12px;
+    padding: 10px;
+    max-height: calc(100vh - 24px);
+  }
+  #logo {
+    top: 12px;
+    left: 12px;
+    padding: 10px 12px;
+  }
+  #logo h1 { font-size: 17px; }
+  #logo p { font-size: 11px; }
+  .legend {
+    bottom: 12px;
+    left: 12px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  #locateBtn {
+    bottom: 12px;
+    right: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  #planPanel {
+    min-width: 0;
+    width: calc(100% - 24px);
+    right: 12px;
+    top: 12px;
+    padding: 10px;
+    max-height: 40vh;
+  }
+  #planResultsPanel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 180px;
+    max-height: 38vh;
+    border-radius: 0;
+  }
+  #huntCodeBadge {
+    top: auto;
+    bottom: 70px;
+    left: 12px;
+    right: 12px;
+    transform: none;
+    width: auto;
+    font-size: 11px;
+  }
+  #leftInfoPanel {
+    top: 100px;
+    left: 12px;
+    width: calc(100% - 24px);
+    max-height: calc(100vh - 300px);
+  }
+}

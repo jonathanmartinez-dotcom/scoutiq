@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ScoutIQ — Colorado Scouting Platform</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="logo">
+  <h1>ScoutIQ</h1>
+  <p>Colorado Scouting Platform</p>
+  <div id="modeTabs">
+    <button type="button" class="modeTab active" data-mode="scout">Scout Tool</button>
+    <button type="button" class="modeTab" data-mode="plan">Plan Your Hunt</button>
+  </div>
+</div>
+
+<div id="leftInfoPanel" style="display:none;">
+  <div id="leftInfoPanelHeader">
+    <span>Unit Info</span>
+    <span class="closeBtn" onclick="document.getElementById('leftInfoPanel').style.display='none';">\u2715</span>
+  </div>
+  <div id="leftInfoPanelBody"></div>
+</div>
+
+<div id="huntCodeBadge" style="display:none;">
+  <span id="huntCodeBadgeText"></span>
+  <button type="button" id="clearHuntCodeBtn">Clear</button>
+</div>
+
+<div id="filterBar">
+  <label for="speciesSelect">Species</label>
+  <select id="speciesSelect">
+    <option value="elk">Elk</option>
+    <option value="mule_deer" disabled>Mule Deer (coming soon)</option>
+    <option value="pronghorn" disabled>Pronghorn (coming soon)</option>
+  </select>
+
+  <label for="seasonSelect" style="margin-top:10px;">Season</label>
+  <select id="seasonSelect">
+    <option value="" selected>Select Season...</option>
+    <option value="archery">Archery</option>
+    <option value="first_rifle">First Rifle</option>
+    <option value="second_rifle">Second Rifle</option>
+    <option value="third_rifle">Third Rifle</option>
+    <option value="fourth_rifle">Fourth Rifle</option>
+    <option value="muzzleloader">Muzzleloader</option>
+  </select>
+
+  <label for="unitSelect" style="margin-top:10px;">Select Colorado Unit</label>
+  <select id="unitSelect">
+    <option value="">Loading units...</option>
+  </select>
+
+  <details class="filterGroup" open>
+    <summary>Basemap</summary>
+    <label class="layerToggle">
+      <input type="radio" name="basemapMode" value="hybrid" checked>
+      <span>Satellite + Topo</span>
+    </label>
+    <label class="layerToggle">
+      <input type="radio" name="basemapMode" value="satellite">
+      <span>Satellite Only</span>
+    </label>
+    <label class="layerToggle">
+      <input type="radio" name="basemapMode" value="topo">
+      <span>Topo Only</span>
+    </label>
+  </details>
+
+  <details class="filterGroup">
+    <summary>Pins</summary>
+    <div class="pinColorRow">
+      <label class="pinColorSwatch selected" style="background:#C0392B;">
+        <input type="radio" name="pinColor" value="red" checked>
+      </label>
+      <label class="pinColorSwatch" style="background:#2C7DA0;">
+        <input type="radio" name="pinColor" value="blue">
+      </label>
+      <label class="pinColorSwatch" style="background:#2D6A4F;">
+        <input type="radio" name="pinColor" value="green">
+      </label>
+      <label class="pinColorSwatch" style="background:#D9A441;">
+        <input type="radio" name="pinColor" value="amber">
+      </label>
+      <label class="pinColorSwatch" style="background:#6A4C93;">
+        <input type="radio" name="pinColor" value="purple">
+      </label>
+    </div>
+    <div class="pinBtnRow">
+      <button type="button" id="dropPinBtn">Drop Pin</button>
+      <button type="button" id="clearPinsBtn">Clear All</button>
+    </div>
+  </details>
+
+  <details class="filterGroup">
+    <summary>Land Filters</summary>
+    <label class="layerToggle">
+      <input type="checkbox" id="blmToggle" disabled>
+      <span>Show BLM Land</span>
+      <button type="button" class="infoBtn" data-info="blm" aria-label="Explain BLM land">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="checkbox" id="forestToggle" disabled>
+      <span>Show National Forest</span>
+      <button type="button" class="infoBtn" data-info="forest" aria-label="Explain National Forest land">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="checkbox" id="privateToggle" disabled>
+      <span>Show Private Land</span>
+      <button type="button" class="infoBtn" data-info="private" aria-label="Explain private land">i</button>
+    </label>
+  </details>
+
+  <details class="filterGroup">
+    <summary>Water</summary>
+    <label class="layerToggle">
+      <input type="checkbox" id="streamsToggle" disabled>
+      <span>Streams & Rivers</span>
+      <button type="button" class="infoBtn" data-info="streams" aria-label="Explain streams and rivers">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="checkbox" id="lakesToggle" disabled>
+      <span>Lakes & Ponds</span>
+      <button type="button" class="infoBtn" data-info="lakes" aria-label="Explain lakes and ponds">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="checkbox" id="springsToggle" disabled>
+      <span>Springs</span>
+      <button type="button" class="infoBtn" data-info="springs" aria-label="Explain springs">i</button>
+    </label>
+  </details>
+
+  <details class="filterGroup">
+    <summary id="wildlifeGroupLabel">Elk</summary>
+    <label class="layerToggle">
+      <input type="checkbox" id="migrationToggle" disabled>
+      <span>Migration Corridors</span>
+      <button type="button" class="infoBtn" data-info="migration" aria-label="Explain elk migration corridors">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="checkbox" id="winterRangeToggle" disabled>
+      <span>Winter Range</span>
+      <button type="button" class="infoBtn" data-info="winterRange" aria-label="Explain elk winter range">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="checkbox" id="summerRangeToggle" disabled>
+      <span>Summer Range</span>
+      <button type="button" class="infoBtn" data-info="summerRange" aria-label="Explain elk summer range">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="checkbox" id="residentToggle" disabled>
+      <span>Resident Herds</span>
+      <button type="button" class="infoBtn" data-info="residentHerd" aria-label="Explain elk resident population areas">i</button>
+    </label>
+  </details>
+
+  <details class="filterGroup">
+    <summary>Trails & OHV</summary>
+    <label class="layerToggle">
+      <input type="checkbox" id="roadsToggle" disabled>
+      <span>Trails</span>
+      <button type="button" class="infoBtn" data-info="roads" aria-label="Explain trails">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="checkbox" id="ohvToggle" disabled>
+      <span>OHV / ATV Trails</span>
+      <button type="button" class="infoBtn" data-info="ohv" aria-label="Explain OHV and ATV trails">i</button>
+    </label>
+  </details>
+
+  <details class="filterGroup">
+    <summary>Terrain Analysis</summary>
+    <label class="layerToggle">
+      <input type="radio" name="terrainMode" value="none" checked disabled class="terrainRadio">
+      <span>Off</span>
+    </label>
+    <label class="layerToggle">
+      <input type="radio" name="terrainMode" value="elevation" disabled class="terrainRadio">
+      <span>Elevation</span>
+      <button type="button" class="infoBtn" data-info="elevation" aria-label="Explain elevation colors">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="radio" name="terrainMode" value="slope" disabled class="terrainRadio">
+      <span>Slope</span>
+      <button type="button" class="infoBtn" data-info="slope" aria-label="Explain slope colors">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="radio" name="terrainMode" value="aspect" disabled class="terrainRadio">
+      <span>Aspect</span>
+      <button type="button" class="infoBtn" data-info="aspect" aria-label="Explain aspect colors">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="radio" name="terrainMode" value="tpi_small" disabled class="terrainRadio">
+      <span>Benches & Draws</span>
+      <button type="button" class="infoBtn" data-info="tpi_small" aria-label="Explain benches and draws colors">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="radio" name="terrainMode" value="tpi_large" disabled class="terrainRadio">
+      <span>Basins & Ridgelines</span>
+      <button type="button" class="infoBtn" data-info="tpi_large" aria-label="Explain basins and ridgelines colors">i</button>
+    </label>
+    <label class="layerToggle">
+      <input type="radio" name="terrainMode" value="curvature" disabled class="terrainRadio">
+      <span>Bowls & Knobs</span>
+      <button type="button" class="infoBtn" data-info="curvature" aria-label="Explain bowls and knobs colors">i</button>
+    </label>
+    <label class="layerToggle" style="border-top:1px solid rgba(27,67,50,0.15);margin-top:10px;padding-top:8px;">
+      <input type="radio" name="terrainMode" value="scoutiq_score" disabled class="terrainRadio">
+      <span id="scoutiqLabel">ScoutIQ Score</span>
+      <button type="button" class="infoBtn" data-info="scoutiq_score" aria-label="Explain ScoutIQ score colors">i</button>
+    </label>
+  </details>
+
+  <div id="status">Select a unit first.</div>
+
+  <button id="resetBtn">Reset Map</button>
+</div>
+
+<div class="legend">
+  <strong>Land Filters</strong>
+  <div><span class="swatch" style="background:#D9A441;"></span>BLM</div>
+  <div><span class="swatch" style="background:#2D6A4F;"></span>National Forest</div>
+  <div><span class="swatch" style="background:#F8F7F3;"></span>Private</div>
+  <strong style="display:block;margin-top:8px;">Water</strong>
+  <div><span class="swatch" style="background:#2C7DA0;"></span>Streams & Rivers</div>
+  <div><span class="swatch" style="background:#61A5C2;"></span>Lakes & Ponds</div>
+  <div><span class="swatch" style="background:#40916C;"></span>Springs</div>
+  <strong style="display:block;margin-top:8px;">Elk</strong>
+  <div><span class="swatch" style="background:#BC4B51;"></span>Migration Corridors</div>
+  <div><span class="swatch" style="background:#4A6FA5;"></span>Winter Range</div>
+  <div><span class="swatch" style="background:#E9C46A;"></span>Summer Range</div>
+  <div><span class="swatch" style="background:#7B2D26;"></span>Resident Herds</div>
+  <strong style="display:block;margin-top:8px;">Trails & OHV</strong>
+  <div><span class="swatch" style="background:#8A5A12;"></span>Trails</div>
+  <div><span class="swatch" style="background:#E76F51;"></span>OHV / ATV Trails</div>
+</div>
+
+<div id="map"></div>
+
+<button id="locateBtn" title="Show my location">⊙ My Location</button>
+
+<div id="infoPopover" role="tooltip"></div>
+
+<div id="planPanel" style="display:none;">
+  <div id="sampleBanner">⚠ SAMPLE DATA — real CPW draw statistics not yet loaded.</div>
+
+  <label for="planSpeciesSelect">Species</label>
+  <select id="planSpeciesSelect">
+    <option value="" selected>Select Species...</option>
+    <option value="elk">Elk</option>
+    <option value="mule_deer" disabled>Mule Deer (coming soon)</option>
+    <option value="pronghorn" disabled>Pronghorn (coming soon)</option>
+  </select>
+
+  <label for="planSeasonSelect" style="margin-top:10px;">Season</label>
+  <select id="planSeasonSelect">
+    <option value="" selected>Select Season...</option>
+    <option value="archery">Archery</option>
+    <option value="muzzleloader">Muzzleloader</option>
+    <option value="first_rifle">First Rifle</option>
+    <option value="second_rifle">Second Rifle</option>
+    <option value="third_rifle">Third Rifle</option>
+    <option value="fourth_rifle">Fourth Rifle</option>
+  </select>
+
+  <label for="residencySelect" style="margin-top:10px;">Residency</label>
+  <select id="residencySelect">
+    <option value="resident">Resident</option>
+    <option value="nonresident">Nonresident</option>
+  </select>
+
+  <label for="pointsSlider" style="margin-top:10px;">
+    Your Preference Points <span id="pointsValue">0</span>
+  </label>
+  <input type="range" id="pointsSlider" min="0" max="15" step="1" value="0">
+  <div class="sliderScale"><span>0</span><span>15+</span></div>
+
+  <label for="sortSelect" style="margin-top:10px;">Sort By</label>
+  <select id="sortSelect">
+    <option value="odds_desc">Best Odds First</option>
+    <option value="odds_asc">Toughest Odds First</option>
+    <option value="unit_asc">Unit Number</option>
+    <option value="applicants_desc">Most Applicants</option>
+  </select>
+
+  <div id="oddsLegend">
+    <strong>Units Colored By Odds</strong>
+    <div class="legendRow"><span class="legendSwatch" style="background:#40916C;border:2px dashed #D9A441;"></span>OTC (dashed border, confirmed)</div>
+    <div class="legendRow"><span class="legendSwatch" style="background:#2D6A4F;"></span>Guaranteed (100%)</div>
+    <div class="legendRow"><span class="legendSwatch" style="background:#74C69D;"></span>Likely (60%+)</div>
+    <div class="legendRow"><span class="legendSwatch" style="background:#D9A441;"></span>Possible (25-59%)</div>
+    <div class="legendRow"><span class="legendSwatch" style="background:#BC4B51;"></span>Long Shot (1-24%)</div>
+    <div class="legendRow"><span class="legendSwatch" style="background:#7B2D26;"></span>Very Unlikely (0%)</div>
+    <div class="legendRow"><span class="legendSwatch" style="background:#cccccc;"></span>No Data / Not Applicable</div>
+  </div>
+</div>
+
+<div id="planResultsPanel" style="display:none;">
+  <div id="planResultsHeader">
+    <span>Draw Odds Results</span>
+    <button type="button" id="togglePlanResultsBtn" title="Collapse/Expand">\u2212</button>
+  </div>
+  <div id="planResultsBody">
+    <div id="unitSearchRow">
+      <input type="text" id="unitSearchInput" placeholder="Search unit # (e.g. 21)..." inputmode="numeric" autocomplete="off">
+      <button type="button" id="unitSearchBtn">Search</button>
+    </div>
+    <div id="unitSearchError" style="display:none;"></div>
+
+    <div id="planPrompt">Select a species and season above to see draw odds by unit.</div>
+
+    <div id="summaryTiles">
+      <div class="tile">
+        <div class="tileValue" id="tileGuaranteed">0</div>
+        <div class="tileLabel">Guaranteed</div>
+      </div>
+      <div class="tile">
+        <div class="tileValue" id="tileLikely">0</div>
+        <div class="tileLabel">Likely (60%+)</div>
+      </div>
+      <div class="tile">
+        <div class="tileValue" id="tileTotal">0</div>
+        <div class="tileLabel">Hunt Codes</div>
+      </div>
+      <div class="tile">
+        <div class="tileValue" id="tileAvgPoints">\u2014</div>
+        <div class="tileLabel">Avg. Pts to Draw</div>
+      </div>
+    </div>
+
+    <div id="tableWrap">
+      <table id="drawTable">
+        <thead>
+          <tr>
+            <th>GMU(s)</th>
+            <th>Hunt Code</th>
+            <th>Quota</th>
+            <th>Applicants</th>
+            <th>Odds</th>
+            <th>Min Pts</th>
+            <th>Trend</th>
+          </tr>
+        </thead>
+        <tbody id="drawTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
